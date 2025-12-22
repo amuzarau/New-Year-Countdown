@@ -83,7 +83,7 @@ st.markdown(
         .ny-time  {{ font-size: 24px; }}
       }}
 
-      /* ✅ Center button wrappers across full page width (covers multiple Streamlit DOMs) */
+      /* Button wrapper centering (covers different Streamlit DOMs) */
       div[data-testid="stButton"],
       div[data-testid="stButton"] > div,
       .stButton,
@@ -94,7 +94,7 @@ st.markdown(
         justify-content: center !important;
       }}
 
-      /* ✅ Only Surprise button gets this class via JS */
+      /* Only Surprise button */
       .ny-surprise-btn {{
         font-size: 1.7rem !important;
         padding: 16px 56px !important;
@@ -103,10 +103,9 @@ st.markdown(
         color: #333 !important;
         border: 2px solid rgba(255, 235, 59, 0.9) !important;
 
-        width: 380px !important;         /* fixed width */
-        max-width: 92vw !important;      /* safe on mobile */
+        width: 380px !important;
+        max-width: 92vw !important;
 
-        /* hard-center the button itself */
         display: block !important;
         margin-left: auto !important;
         margin-right: auto !important;
@@ -142,7 +141,7 @@ st.markdown(
         }}
       }}
 
-      /* Confetti overlay */
+      /* Confetti */
       .ny-confetti-layer {{
         position: fixed;
         inset: 0;
@@ -179,19 +178,26 @@ st.markdown(
 st.snow()
 
 # -----------------------------
-# HERO IMAGE
+# HERO IMAGE (Cloud-safe)
+# Only repo paths: assets/
+# Never crash if missing
 # -----------------------------
 hero_candidates = [
     Path("assets/christmas-tree-presents.png"),
     Path("assets/christmas-tree-presents.webp"),
-    Path("/mnt/data/christmas-tree-presents.png"),
+    Path("assets/christmas-tree-presents.jpg"),
 ]
 hero_path = next((p for p in hero_candidates if p.exists()), None)
 
 with hero_slot:
     if hero_path:
-        st.image(str(hero_path), width="stretch")
+        try:
+            st.image(str(hero_path), width="stretch")
+        except Exception:
+            st.warning("Hero image cannot be opened. Check that it exists in the repo under assets/ and is not corrupted.")
+            st.markdown("<div class='ny-center' style='font-size:48px;'>🎄🎁</div>", unsafe_allow_html=True)
     else:
+        st.warning("Hero image not found. Put it in assets/ as christmas-tree-presents.png (or .jpg/.webp).")
         st.markdown("<div class='ny-center' style='font-size:48px;'>🎄🎁</div>", unsafe_allow_html=True)
 
 st.markdown("<div style='height:20px;'></div>", unsafe_allow_html=True)
@@ -241,48 +247,39 @@ with mid_c:
         unsafe_allow_html=True,
     )
 
+# marker for confetti origin
 st.markdown("<div id='surprise-marker'></div>", unsafe_allow_html=True)
 st.markdown("<div style='height:70px;'></div>", unsafe_allow_html=True)
 
-# The button
 clicked = st.button(btn_text, key="surprise_button")
 
-# -----------------------------
-# Robust JS: keep trying for a short time (Streamlit rerenders)
-# - add glow class
-# - force wrapper to full width + centered
-# -----------------------------
+# Glow + centering enforcement (short polling helps Streamlit rerenders)
 components.html(
     """
     <script>
     (function() {
       let doc = document;
-      try {
-        if (window.parent && window.parent.document) doc = window.parent.document;
-      } catch(e) {}
+      try { if (window.parent && window.parent.document) doc = window.parent.document; } catch(e) {}
 
       const start = Date.now();
       const maxMs = 2500;
 
       const timer = setInterval(() => {
-        // stop after maxMs
-        if (Date.now() - start > maxMs) {
-          clearInterval(timer);
-          return;
-        }
+        if (Date.now() - start > maxMs) { clearInterval(timer); return; }
 
         const btn = Array.from(doc.querySelectorAll("button"))
           .find(b => ((b.innerText || "").trim()).includes("Surprise"));
-
         if (!btn) return;
 
-        // glow
         btn.classList.add("ny-surprise-btn");
+        btn.style.display = "block";
+        btn.style.marginLeft = "auto";
+        btn.style.marginRight = "auto";
 
-        // center its nearest Streamlit wrappers (different versions)
-        const wrap1 = btn.closest('div[data-testid="stButton"]');
-        const wrap2 = btn.closest('.stButton') || btn.closest('div.stButton');
-        const wrap = wrap1 || wrap2;
+        const wrap =
+          btn.closest('div[data-testid="stButton"]') ||
+          btn.closest('.stButton') ||
+          btn.closest('div.stButton');
 
         if (wrap) {
           wrap.style.width = "100%";
@@ -290,12 +287,6 @@ components.html(
           wrap.style.justifyContent = "center";
         }
 
-        // also ensure button is centered
-        btn.style.display = "block";
-        btn.style.marginLeft = "auto";
-        btn.style.marginRight = "auto";
-
-        // if we reached here, we succeeded -> stop
         clearInterval(timer);
       }, 60);
     })();
@@ -304,9 +295,7 @@ components.html(
     height=1,
 )
 
-# -----------------------------
-# Click: audio + confetti
-# -----------------------------
+# Click: audio + confetti upwards
 if clicked:
     sounds = list(Path("assets").glob("*.mp3"))
     if sounds:
@@ -355,7 +344,7 @@ if clicked:
             p.style.background = colors[(Math.random() * colors.length) | 0];
 
             const dx = (Math.random() - 0.5) * 420;
-            const dy = -(180 + Math.random() * 320);   // UP
+            const dy = -(180 + Math.random() * 320);
             const rot = (Math.random() * 720 - 360) + "deg";
             const dur = (900 + Math.random() * 800) + "ms";
 
