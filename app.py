@@ -77,33 +77,56 @@ st.markdown(
         color: {text};
       }}
 
-      /* Controls text dark */
+      /* RU/EN and Toggle text color (same) */
       div[data-testid="stRadio"] * {{ color: #111 !important; }}
       div[data-testid="stToggle"] * {{ color: #111 !important; }}
 
+      /* Make toggle label always readable */
+      div[data-testid="stToggle"] label,
+      div[data-testid="stToggle"] p,
+      div[data-testid="stToggle"] span {{
+        color: #111 !important;
+        font-weight: 700 !important;
+      }}
+
       /* Light chip behind controls */
       div[data-testid="stRadio"] > div {{
-        background: rgba(255,255,255,0.92);
+        background: rgba(255,255,255,0.96);
         padding: 8px 12px;
         border-radius: 14px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.08);
       }}
       div[data-testid="stToggle"] {{
-        background: rgba(255,255,255,0.92);
+        background: rgba(255,255,255,0.96);
         padding: 8px 12px;
         border-radius: 14px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.08);
       }}
 
+      /* ✅ Mobile: Day/Night same color as RU/EN (#111) */
+      @media (max-width: 600px) {{
+        div[data-testid="stToggle"] {{
+          background: #ffffff !important;
+          border: 2px solid rgba(0,0,0,0.18) !important;
+        }}
+        div[data-testid="stToggle"] label,
+        div[data-testid="stToggle"] p,
+        div[data-testid="stToggle"] span {{
+          color: #111 !important;      /* ✅ same as RU/EN */
+          font-weight: 800 !important;
+          font-size: 15px !important;
+        }}
+      }}
+
+      /* ✅ 2x less gap between controls and countdown */
       .ny-center {{
         text-align: center;
-        margin-top: 14px;
+        margin-top: 7px;   /* was 14px */
       }}
 
       .ny-title {{ font-size: 34px; color: {sub}; }}
       .ny-days  {{ font-size: 112px; font-weight: 800; line-height: 1; margin-top: 6px; }}
 
-      /* ✅ keep bottom margin at 0 so button can be glued */
       .ny-time {{
         font-size: 34px;
         margin-top: 10px;
@@ -118,7 +141,7 @@ st.markdown(
         .ny-time  {{ font-size: 24px; }}
       }}
 
-      /* ✅ Ultra-tight button block: remove ALL vertical spacing */
+      /* Ultra-tight button block */
       div[data-testid="stButton"],
       div[data-testid="stButton"] > div,
       .stButton,
@@ -127,7 +150,6 @@ st.markdown(
         width: 100% !important;
         display: flex !important;
         justify-content: center !important;
-
         margin-top: 0 !important;
         margin-bottom: 0 !important;
         padding-top: 0 !important;
@@ -135,7 +157,6 @@ st.markdown(
         gap: 0 !important;
       }}
 
-      /* Some Streamlit versions add extra margin on markdown wrappers */
       .element-container {{
         margin-top: 0 !important;
         margin-bottom: 0 !important;
@@ -257,10 +278,8 @@ with mid_c:
         unsafe_allow_html=True,
     )
 
-# ✅ ZERO GAP (closer than 2px)
+# ✅ glued to the time line
 st.markdown("<div style='height:0px;'></div>", unsafe_allow_html=True)
-
-# marker for confetti origin
 st.markdown("<div id='surprise-marker'></div>", unsafe_allow_html=True)
 
 # =========================================================
@@ -270,7 +289,6 @@ b1, b2, b3 = st.columns([1, 2, 1])
 with b2:
     clicked = st.button(btn_text, key="surprise_button")
 
-# Add glow class for RU/EN
 components.html(
     """
     <script>
