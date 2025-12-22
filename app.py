@@ -37,7 +37,7 @@ def find_hero_image() -> Path | None:
 
 
 # =========================================================
-# 1) HERO IMAGE — MUST BE FIRST
+# 1) HERO IMAGE — TOP OF APP
 # =========================================================
 hero_path = find_hero_image()
 
@@ -64,7 +64,7 @@ bg = "#0b1220" if night else "#ffffff"
 text = "#e8eefc" if night else "#111111"
 sub = "#b7c4e6" if night else "#444444"
 
-# Button text by language ✅
+# Localized button text
 btn_text = "🎁 Сюрприз" if lang == "RU" else "🎁 Surprise"
 
 # =========================================================
@@ -103,10 +103,12 @@ st.markdown(
 
       .ny-title {{ font-size: 34px; color: {sub}; }}
       .ny-days  {{ font-size: 112px; font-weight: 800; line-height: 1; margin-top: 6px; }}
+
+      /* margin-bottom = 0 so our spacer controls the gap exactly */
       .ny-time  {{
         font-size: 34px;
         margin-top: 10px;
-        margin-bottom: 0 !important; /* keep exact 4px spacer */
+        margin-bottom: 0 !important;
         color: {sub};
       }}
 
@@ -245,20 +247,20 @@ with mid_c:
         unsafe_allow_html=True,
     )
 
-# ✅ exact 4px gap below time line
-st.markdown("<div style='height:4px;'></div>", unsafe_allow_html=True)
+# ✅ 2x closer: 2px gap (was 4px)
+st.markdown("<div style='height:2px;'></div>", unsafe_allow_html=True)
 
 # marker for confetti origin
 st.markdown("<div id='surprise-marker'></div>", unsafe_allow_html=True)
 
 # =========================================================
-# 4) SURPRISE BUTTON (localized text)
+# 4) BUTTON
 # =========================================================
 b1, b2, b3 = st.columns([1, 2, 1])
 with b2:
     clicked = st.button(btn_text, key="surprise_button")
 
-# Add glow class to the button (works for both RU/EN)
+# Add glow class for both RU/EN button labels
 components.html(
     """
     <script>
@@ -287,7 +289,7 @@ components.html(
 )
 
 # =========================================================
-# 5) Click: audio + confetti
+# 5) CLICK: AUDIO + CONFETTI
 # =========================================================
 if clicked:
     sounds = list(Path("assets").glob("*.mp3"))
@@ -356,5 +358,3 @@ if clicked:
         """,
         height=1,
     )
-
-
