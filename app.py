@@ -17,29 +17,30 @@ def plural_ru(n: int, one: str, two: str, five: str) -> str:
     return five
 
 
-# nonce to re-run confetti script each click (no key=)
 if "confetti_nonce" not in st.session_state:
     st.session_state.confetti_nonce = 0
 
+
+# -----------------------------
+# TOP image slot
+# -----------------------------
+hero_slot = st.empty()
 
 # -----------------------------
 # Controls
 # -----------------------------
 c1, c2, c3 = st.columns([2, 3, 2])
 with c2:
-    lang = st.radio(
-        "Language", ["RU", "EN"], horizontal=True, label_visibility="collapsed"
-    )
+    lang = st.radio("Language", ["RU", "EN"], horizontal=True, label_visibility="collapsed")
 with c3:
-    night = st.toggle("🌙 Night", value=False)
+    night = st.toggle("🌙 Day / Night", value=False)
 
 bg = "#0b1220" if night else "#ffffff"
 text = "#e8eefc" if night else "#111111"
 sub = "#b7c4e6" if night else "#444444"
 
-
 # -----------------------------
-# CSS (glow ONLY on .ny-surprise-btn)
+# CSS
 # -----------------------------
 st.markdown(
     f"""
@@ -49,33 +50,48 @@ st.markdown(
         color: {text};
       }}
 
+      /* Controls text dark */
+      div[data-testid="stRadio"] * {{ color: #111 !important; }}
+      div[data-testid="stToggle"] * {{ color: #111 !important; }}
+
+      /* Light chip behind controls */
+      div[data-testid="stRadio"] > div {{
+        background: rgba(255,255,255,0.92);
+        padding: 8px 12px;
+        border-radius: 14px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      }}
+      div[data-testid="stToggle"] {{
+        background: rgba(255,255,255,0.92);
+        padding: 8px 12px;
+        border-radius: 14px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      }}
+
       .ny-center {{
         text-align: center;
-        margin-top: 18px;
+        margin-top: 16px;
       }}
 
-      .ny-title {{
-        font-size: 38px;
-        color: {sub};
-      }}
-
-      .ny-days {{
-        font-size: 120px;
-        font-weight: 800;
-        line-height: 1;
-        margin-top: 6px;
-      }}
-
-      .ny-time {{
-        font-size: 36px;
-        margin-top: 10px;
-        color: {sub};
-      }}
+      .ny-title {{ font-size: 34px; color: {sub}; }}
+      .ny-days  {{ font-size: 112px; font-weight: 800; line-height: 1; margin-top: 6px; }}
+      .ny-time  {{ font-size: 34px; margin-top: 10px; color: {sub}; }}
 
       @media (max-width: 768px) {{
-        .ny-title {{ font-size: 26px; }}
-        .ny-days  {{ font-size: 72px; }}
-        .ny-time  {{ font-size: 26px; }}
+        .ny-title {{ font-size: 24px; }}
+        .ny-days  {{ font-size: 68px; }}
+        .ny-time  {{ font-size: 24px; }}
+      }}
+
+      /* ✅ Center button wrappers across full page width (covers multiple Streamlit DOMs) */
+      div[data-testid="stButton"],
+      div[data-testid="stButton"] > div,
+      .stButton,
+      .stButton > div,
+      div.stButton {{
+        width: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
       }}
 
       /* ✅ Only Surprise button gets this class via JS */
@@ -87,10 +103,13 @@ st.markdown(
         color: #333 !important;
         border: 2px solid rgba(255, 235, 59, 0.9) !important;
 
-        /* adaptive width */
-        width: min(420px, 92vw) !important;
-        display: inline-flex !important;
-        justify-content: center !important;
+        width: 380px !important;         /* fixed width */
+        max-width: 92vw !important;      /* safe on mobile */
+
+        /* hard-center the button itself */
+        display: block !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
 
         box-shadow:
           0 0 18px rgba(255, 235, 59, 1),
@@ -105,14 +124,6 @@ st.markdown(
           font-size: 1.25rem !important;
           padding: 12px 18px !important;
           width: min(360px, 92vw) !important;
-        }}
-      }}
-
-      @media (max-width: 380px) {{
-        .ny-surprise-btn {{
-          font-size: 1.1rem !important;
-          padding: 10px 14px !important;
-          width: 92vw !important;
         }}
       }}
 
@@ -131,7 +142,7 @@ st.markdown(
         }}
       }}
 
-      /* Confetti pieces (lightweight, no canvas loop) */
+      /* Confetti overlay */
       .ny-confetti-layer {{
         position: fixed;
         inset: 0;
@@ -165,18 +176,25 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Snow
 st.snow()
 
 # -----------------------------
-# Side images
+# HERO IMAGE
 # -----------------------------
-left, center, right = st.columns([2.5, 5, 3])
-with left:
-    st.image("assets/santa_presents_3.png", width="stretch")
-with right:
-    st.image("assets/christmas_ornament_1.png", width="stretch")
+hero_candidates = [
+    Path("assets/christmas-tree-presents.png"),
+    Path("assets/christmas-tree-presents.webp"),
+    Path("/mnt/data/christmas-tree-presents.png"),
+]
+hero_path = next((p for p in hero_candidates if p.exists()), None)
 
+with hero_slot:
+    if hero_path:
+        st.image(str(hero_path), width="stretch")
+    else:
+        st.markdown("<div class='ny-center' style='font-size:48px;'>🎄🎁</div>", unsafe_allow_html=True)
+
+st.markdown("<div style='height:20px;'></div>", unsafe_allow_html=True)
 
 # -----------------------------
 # Countdown
@@ -199,7 +217,6 @@ if lang == "RU":
         f"{minutes} {plural_ru(minutes, 'минута', 'минуты', 'минут')} "
         f"{secs} {plural_ru(secs, 'секунда', 'секунды', 'секунд')}"
     )
-    btn_text = "🎁 Сюрприз"
 else:
     title = "Time left until New Year"
     days_line = f"{days} day{'s' if days != 1 else ''}"
@@ -208,14 +225,11 @@ else:
         f"{minutes} minute{'s' if minutes != 1 else ''} "
         f"{secs} second{'s' if secs != 1 else ''}"
     )
-    btn_text = "🎁 Surprise"
 
+btn_text = "🎁 Surprise"
 
-# -----------------------------
-# Center block + button
-# -----------------------------
-clicked = False
-with center:
+mid_l, mid_c, mid_r = st.columns([1, 6, 1])
+with mid_c:
     st.markdown(
         f"""
         <div class="ny-center">
@@ -227,37 +241,63 @@ with center:
         unsafe_allow_html=True,
     )
 
-    # Marker above the button (confetti origin)
-    st.markdown("<div id='surprise-marker'></div>", unsafe_allow_html=True)
+st.markdown("<div id='surprise-marker'></div>", unsafe_allow_html=True)
+st.markdown("<div style='height:70px;'></div>", unsafe_allow_html=True)
 
-    # ✅ 2x larger gap before button
-    st.markdown("<div style='height:80px;'></div>", unsafe_allow_html=True)
-
-    b1, b2, b3 = st.columns([1, 2, 1])
-    with b2:
-        clicked = st.button(btn_text, key="surprise_button")
-
+# The button
+clicked = st.button(btn_text, key="surprise_button")
 
 # -----------------------------
-# Add class to the Surprise button (stable, prevents affecting other buttons)
-# Run every time (cheap)
+# Robust JS: keep trying for a short time (Streamlit rerenders)
+# - add glow class
+# - force wrapper to full width + centered
 # -----------------------------
 components.html(
     """
     <script>
     (function() {
       let doc = document;
-      try { if (window.parent && window.parent.document) doc = window.parent.document; } catch(e) {}
+      try {
+        if (window.parent && window.parent.document) doc = window.parent.document;
+      } catch(e) {}
 
-      const texts = ["Surprise", "Сюрприз"];
-      const buttons = Array.from(doc.querySelectorAll("button"));
+      const start = Date.now();
+      const maxMs = 2500;
 
-      for (const b of buttons) {
-        const t = (b.innerText || "").trim();
-        if (texts.some(x => t.includes(x))) {
-          b.classList.add("ny-surprise-btn");
+      const timer = setInterval(() => {
+        // stop after maxMs
+        if (Date.now() - start > maxMs) {
+          clearInterval(timer);
+          return;
         }
-      }
+
+        const btn = Array.from(doc.querySelectorAll("button"))
+          .find(b => ((b.innerText || "").trim()).includes("Surprise"));
+
+        if (!btn) return;
+
+        // glow
+        btn.classList.add("ny-surprise-btn");
+
+        // center its nearest Streamlit wrappers (different versions)
+        const wrap1 = btn.closest('div[data-testid="stButton"]');
+        const wrap2 = btn.closest('.stButton') || btn.closest('div.stButton');
+        const wrap = wrap1 || wrap2;
+
+        if (wrap) {
+          wrap.style.width = "100%";
+          wrap.style.display = "flex";
+          wrap.style.justifyContent = "center";
+        }
+
+        // also ensure button is centered
+        btn.style.display = "block";
+        btn.style.marginLeft = "auto";
+        btn.style.marginRight = "auto";
+
+        // if we reached here, we succeeded -> stop
+        clearInterval(timer);
+      }, 60);
     })();
     </script>
     """,
@@ -265,7 +305,7 @@ components.html(
 )
 
 # -----------------------------
-# Click: audio + simple stable confetti overlay (no layout jump)
+# Click: audio + confetti
 # -----------------------------
 if clicked:
     sounds = list(Path("assets").glob("*.mp3"))
@@ -273,55 +313,51 @@ if clicked:
         st.audio(str(random.choice(sounds)), autoplay=True)
 
     st.session_state.confetti_nonce += 1
-    nonce = st.session_state.confetti_nonce
 
     components.html(
-        f"""
+        """
         <script>
-        (function() {{
+        (function() {
           let doc = document;
           let win = window;
-          try {{
-            if (window.parent && window.parent.document) {{
+          try {
+            if (window.parent && window.parent.document) {
               doc = window.parent.document;
               win = window.parent;
-            }}
-          }} catch(e) {{}}
+            }
+          } catch(e) {}
 
-          // Remove previous layer
           const old = doc.getElementById("ny-confetti-layer");
           if (old) old.remove();
 
-          // Origin: marker above button (fallback center)
           let x = win.innerWidth * 0.5;
-          let y = win.innerHeight * 0.60;
+          let y = win.innerHeight * 0.65;
           const marker = doc.getElementById("surprise-marker");
-          if (marker) {{
+          if (marker) {
             const r = marker.getBoundingClientRect();
             x = r.left + r.width / 2;
             y = Math.max(20, r.top - 6);
-          }}
+          }
 
-          // Create overlay layer
           const layer = doc.createElement("div");
           layer.id = "ny-confetti-layer";
           layer.className = "ny-confetti-layer";
           doc.body.appendChild(layer);
 
           const colors = ["#ff1744","#ffea00","#00e676","#2979ff","#ff9100","#e040fb"];
-          const N = 70; // light + stable
+          const N = 90;
 
-          for (let i = 0; i < N; i++) {{
+          for (let i = 0; i < N; i++) {
             const p = doc.createElement("div");
             p.className = "ny-confetti-piece";
             p.style.left = x + "px";
             p.style.top  = y + "px";
             p.style.background = colors[(Math.random() * colors.length) | 0];
 
-            const dx = (Math.random() - 0.5) * 360;        // sideways
-            const dy = -(120 + Math.random() * 220);       // up
+            const dx = (Math.random() - 0.5) * 420;
+            const dy = -(180 + Math.random() * 320);   // UP
             const rot = (Math.random() * 720 - 360) + "deg";
-            const dur = (900 + Math.random() * 700) + "ms";
+            const dur = (900 + Math.random() * 800) + "ms";
 
             p.style.setProperty("--dx", dx + "px");
             p.style.setProperty("--dy", dy + "px");
@@ -329,14 +365,13 @@ if clicked:
             p.style.setProperty("--dur", dur);
 
             layer.appendChild(p);
-          }}
+          }
 
-          // cleanup
-          setTimeout(() => {{
+          setTimeout(() => {
             const lay = doc.getElementById("ny-confetti-layer");
             if (lay) lay.remove();
-          }}, 1700);
-        }})();
+          }, 1900);
+        })();
         </script>
         """,
         height=1,
