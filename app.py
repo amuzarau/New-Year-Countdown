@@ -3,6 +3,7 @@ from datetime import datetime
 import random
 from pathlib import Path
 import streamlit.components.v1 as components
+from zoneinfo import ZoneInfo
 
 st.set_page_config(page_title="🎄 New Year Countdown", layout="wide")
 
@@ -26,6 +27,7 @@ def find_hero_image() -> Path | None:
         Path("assets/christmas-tree-presents.png"),
         Path("assets/christmas-tree-presents.webp"),
         Path("assets/christmas-tree-presents.jpg"),
+        # fallback for local/container runs (not Streamlit Cloud)
         Path("/mnt/data/christmas-tree-presents.png"),
         Path("/mnt/data/christmas-tree-presents.webp"),
         Path("/mnt/data/christmas-tree-presents.jpg"),
@@ -103,7 +105,7 @@ st.markdown(
         box-shadow: 0 2px 10px rgba(0,0,0,0.08);
       }}
 
-      /* ✅ Mobile: Day/Night same color as RU/EN (#111) */
+      /* Mobile: Day/Night same color as RU/EN (#111) */
       @media (max-width: 600px) {{
         div[data-testid="stToggle"] {{
           background: #ffffff !important;
@@ -112,21 +114,22 @@ st.markdown(
         div[data-testid="stToggle"] label,
         div[data-testid="stToggle"] p,
         div[data-testid="stToggle"] span {{
-          color: #111 !important;      /* ✅ same as RU/EN */
+          color: #111 !important;
           font-weight: 800 !important;
           font-size: 15px !important;
         }}
       }}
 
-      /* ✅ 2x less gap between controls and countdown */
+      /* 2x less gap between controls and countdown */
       .ny-center {{
         text-align: center;
-        margin-top: 7px;   /* was 14px */
+        margin-top: 7px;
       }}
 
       .ny-title {{ font-size: 34px; color: {sub}; }}
       .ny-days  {{ font-size: 112px; font-weight: 800; line-height: 1; margin-top: 6px; }}
 
+      /* margin-bottom = 0 so button can be glued */
       .ny-time {{
         font-size: 34px;
         margin-top: 10px;
@@ -236,17 +239,22 @@ st.markdown(
 st.snow()
 
 # =========================================================
-# 3) COUNTDOWN
+# 3) COUNTDOWN (STRICTLY BY MINSK TIME)
 # =========================================================
-now = datetime.now()
-new_year = datetime(now.year + 1, 1, 1, 0, 0, 0)
-delta = new_year - now
+tz = ZoneInfo("Europe/Minsk")  # ✅ Минск (UTC+3)
 
-days = delta.days
-seconds = delta.seconds
-hours = seconds // 3600
-minutes = (seconds % 3600) // 60
-secs = seconds % 60
+now = datetime.now(tz)
+new_year = datetime(now.year + 1, 1, 1, 0, 0, 0, tzinfo=tz)
+
+delta = new_year - now
+total = int(delta.total_seconds())
+if total < 0:
+    total = 0  # just in case after New Year
+
+days = total // 86400
+hours = (total % 86400) // 3600
+minutes = (total % 3600) // 60
+secs = total % 60
 
 if lang == "RU":
     title = "До Нового года осталось"
@@ -278,7 +286,7 @@ with mid_c:
         unsafe_allow_html=True,
     )
 
-# ✅ glued to the time line
+# ✅ glued to the time line (0px gap)
 st.markdown("<div style='height:0px;'></div>", unsafe_allow_html=True)
 st.markdown("<div id='surprise-marker'></div>", unsafe_allow_html=True)
 
@@ -289,6 +297,7 @@ b1, b2, b3 = st.columns([1, 2, 1])
 with b2:
     clicked = st.button(btn_text, key="surprise_button")
 
+# Add glow class for RU/EN button labels
 components.html(
     """
     <script>
@@ -365,7 +374,7 @@ if clicked:
             p.style.background = colors[(Math.random() * colors.length) | 0];
 
             const dx = (Math.random() - 0.5) * 420;
-            const dy = -(180 + Math.random() * 320);
+            const dy = -(180 + Math.random() * 320);  // UP
             const rot = (Math.random() * 720 - 360) + "deg";
             const dur = (900 + Math.random() * 800) + "ms";
 
