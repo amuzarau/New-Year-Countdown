@@ -64,7 +64,6 @@ bg = "#0b1220" if night else "#ffffff"
 text = "#e8eefc" if night else "#111111"
 sub = "#b7c4e6" if night else "#444444"
 
-# Localized button text
 btn_text = "🎁 Сюрприз" if lang == "RU" else "🎁 Surprise"
 
 # =========================================================
@@ -104,11 +103,12 @@ st.markdown(
       .ny-title {{ font-size: 34px; color: {sub}; }}
       .ny-days  {{ font-size: 112px; font-weight: 800; line-height: 1; margin-top: 6px; }}
 
-      /* margin-bottom = 0 so our spacer controls the gap exactly */
-      .ny-time  {{
+      /* ✅ keep bottom margin at 0 so button can be glued */
+      .ny-time {{
         font-size: 34px;
         margin-top: 10px;
         margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
         color: {sub};
       }}
 
@@ -118,7 +118,7 @@ st.markdown(
         .ny-time  {{ font-size: 24px; }}
       }}
 
-      /* Center Streamlit button wrapper */
+      /* ✅ Ultra-tight button block: remove ALL vertical spacing */
       div[data-testid="stButton"],
       div[data-testid="stButton"] > div,
       .stButton,
@@ -127,8 +127,18 @@ st.markdown(
         width: 100% !important;
         display: flex !important;
         justify-content: center !important;
+
         margin-top: 0 !important;
+        margin-bottom: 0 !important;
         padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        gap: 0 !important;
+      }}
+
+      /* Some Streamlit versions add extra margin on markdown wrappers */
+      .element-container {{
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
       }}
 
       /* Glow button */
@@ -247,8 +257,8 @@ with mid_c:
         unsafe_allow_html=True,
     )
 
-# ✅ 2x closer: 2px gap (was 4px)
-st.markdown("<div style='height:2px;'></div>", unsafe_allow_html=True)
+# ✅ ZERO GAP (closer than 2px)
+st.markdown("<div style='height:0px;'></div>", unsafe_allow_html=True)
 
 # marker for confetti origin
 st.markdown("<div id='surprise-marker'></div>", unsafe_allow_html=True)
@@ -260,7 +270,7 @@ b1, b2, b3 = st.columns([1, 2, 1])
 with b2:
     clicked = st.button(btn_text, key="surprise_button")
 
-# Add glow class for both RU/EN button labels
+# Add glow class for RU/EN
 components.html(
     """
     <script>
