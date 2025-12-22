@@ -21,14 +21,39 @@ if "confetti_nonce" not in st.session_state:
     st.session_state.confetti_nonce = 0
 
 
-# -----------------------------
-# TOP image slot
-# -----------------------------
-hero_slot = st.empty()
+def find_hero_image() -> Path | None:
+    candidates = [
+        Path("assets/christmas-tree-presents.png"),
+        Path("assets/christmas-tree-presents.webp"),
+        Path("assets/christmas-tree-presents.jpg"),
+        Path("/mnt/data/christmas-tree-presents.png"),
+        Path("/mnt/data/christmas-tree-presents.webp"),
+        Path("/mnt/data/christmas-tree-presents.jpg"),
+    ]
+    for p in candidates:
+        if p.exists():
+            return p
+    return None
 
-# -----------------------------
-# Controls
-# -----------------------------
+
+# =========================================================
+# 1) HERO IMAGE — MUST BE FIRST
+# =========================================================
+hero_path = find_hero_image()
+
+top_l, top_c, top_r = st.columns([1, 6, 1])
+with top_c:
+    if hero_path:
+        st.image(str(hero_path), width="stretch")
+    else:
+        st.warning("Hero image not found. Put it in assets/ as christmas-tree-presents.png")
+        st.markdown("<div style='text-align:center;font-size:48px;'>🎄🎁</div>", unsafe_allow_html=True)
+
+st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
+
+# =========================================================
+# 2) CONTROLS
+# =========================================================
 c1, c2, c3 = st.columns([2, 3, 2])
 with c2:
     lang = st.radio("Language", ["RU", "EN"], horizontal=True, label_visibility="collapsed")
@@ -39,9 +64,12 @@ bg = "#0b1220" if night else "#ffffff"
 text = "#e8eefc" if night else "#111111"
 sub = "#b7c4e6" if night else "#444444"
 
-# -----------------------------
+# Button text by language ✅
+btn_text = "🎁 Сюрприз" if lang == "RU" else "🎁 Surprise"
+
+# =========================================================
 # CSS
-# -----------------------------
+# =========================================================
 st.markdown(
     f"""
     <style>
@@ -70,12 +98,17 @@ st.markdown(
 
       .ny-center {{
         text-align: center;
-        margin-top: 16px;
+        margin-top: 14px;
       }}
 
       .ny-title {{ font-size: 34px; color: {sub}; }}
       .ny-days  {{ font-size: 112px; font-weight: 800; line-height: 1; margin-top: 6px; }}
-      .ny-time  {{ font-size: 34px; margin-top: 10px; color: {sub}; }}
+      .ny-time  {{
+        font-size: 34px;
+        margin-top: 10px;
+        margin-bottom: 0 !important; /* keep exact 4px spacer */
+        color: {sub};
+      }}
 
       @media (max-width: 768px) {{
         .ny-title {{ font-size: 24px; }}
@@ -83,7 +116,7 @@ st.markdown(
         .ny-time  {{ font-size: 24px; }}
       }}
 
-      /* Button wrapper centering (covers different Streamlit DOMs) */
+      /* Center Streamlit button wrapper */
       div[data-testid="stButton"],
       div[data-testid="stButton"] > div,
       .stButton,
@@ -92,23 +125,24 @@ st.markdown(
         width: 100% !important;
         display: flex !important;
         justify-content: center !important;
+        margin-top: 0 !important;
+        padding-top: 0 !important;
       }}
 
-      /* Only Surprise button */
+      /* Glow button */
       .ny-surprise-btn {{
-        font-size: 1.7rem !important;
-        padding: 16px 56px !important;
+        font-size: 1.45rem !important;
+        padding: 14px 48px !important;
         border-radius: 18px !important;
         background: #ffffff !important;
         color: #333 !important;
         border: 2px solid rgba(255, 235, 59, 0.9) !important;
 
-        width: 380px !important;
+        width: 360px !important;
         max-width: 92vw !important;
 
-        display: block !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
+        display: inline-flex !important;
+        justify-content: center !important;
 
         box-shadow:
           0 0 18px rgba(255, 235, 59, 1),
@@ -120,9 +154,9 @@ st.markdown(
 
       @media (max-width: 600px) {{
         .ny-surprise-btn {{
-          font-size: 1.25rem !important;
+          font-size: 1.18rem !important;
           padding: 12px 18px !important;
-          width: min(360px, 92vw) !important;
+          width: min(340px, 92vw) !important;
         }}
       }}
 
@@ -141,14 +175,13 @@ st.markdown(
         }}
       }}
 
-      /* Confetti */
+      /* Confetti overlay */
       .ny-confetti-layer {{
         position: fixed;
         inset: 0;
         pointer-events: none;
         z-index: 999999;
       }}
-
       .ny-confetti-piece {{
         position: fixed;
         width: 8px;
@@ -157,18 +190,10 @@ st.markdown(
         opacity: 1;
         will-change: transform, opacity;
         animation: nyConfetti var(--dur) ease-out forwards;
-        transform: translate(0,0) rotate(0deg);
       }}
-
       @keyframes nyConfetti {{
-        from {{
-          transform: translate(0px, 0px) rotate(0deg);
-          opacity: 1;
-        }}
-        to {{
-          transform: translate(var(--dx), var(--dy)) rotate(var(--rot));
-          opacity: 0;
-        }}
+        from {{ transform: translate(0px, 0px) rotate(0deg); opacity: 1; }}
+        to   {{ transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; }}
       }}
     </style>
     """,
@@ -177,34 +202,9 @@ st.markdown(
 
 st.snow()
 
-# -----------------------------
-# HERO IMAGE (Cloud-safe)
-# Only repo paths: assets/
-# Never crash if missing
-# -----------------------------
-hero_candidates = [
-    Path("assets/christmas-tree-presents.png"),
-    Path("assets/christmas-tree-presents.webp"),
-    Path("assets/christmas-tree-presents.jpg"),
-]
-hero_path = next((p for p in hero_candidates if p.exists()), None)
-
-with hero_slot:
-    if hero_path:
-        try:
-            st.image(str(hero_path), width="stretch")
-        except Exception:
-            st.warning("Hero image cannot be opened. Check that it exists in the repo under assets/ and is not corrupted.")
-            st.markdown("<div class='ny-center' style='font-size:48px;'>🎄🎁</div>", unsafe_allow_html=True)
-    else:
-        st.warning("Hero image not found. Put it in assets/ as christmas-tree-presents.png (or .jpg/.webp).")
-        st.markdown("<div class='ny-center' style='font-size:48px;'>🎄🎁</div>", unsafe_allow_html=True)
-
-st.markdown("<div style='height:20px;'></div>", unsafe_allow_html=True)
-
-# -----------------------------
-# Countdown
-# -----------------------------
+# =========================================================
+# 3) COUNTDOWN
+# =========================================================
 now = datetime.now()
 new_year = datetime(now.year + 1, 1, 1, 0, 0, 0)
 delta = new_year - now
@@ -232,8 +232,6 @@ else:
         f"{secs} second{'s' if secs != 1 else ''}"
     )
 
-btn_text = "🎁 Surprise"
-
 mid_l, mid_c, mid_r = st.columns([1, 6, 1])
 with mid_c:
     st.markdown(
@@ -247,13 +245,20 @@ with mid_c:
         unsafe_allow_html=True,
     )
 
+# ✅ exact 4px gap below time line
+st.markdown("<div style='height:4px;'></div>", unsafe_allow_html=True)
+
 # marker for confetti origin
 st.markdown("<div id='surprise-marker'></div>", unsafe_allow_html=True)
-st.markdown("<div style='height:70px;'></div>", unsafe_allow_html=True)
 
-clicked = st.button(btn_text, key="surprise_button")
+# =========================================================
+# 4) SURPRISE BUTTON (localized text)
+# =========================================================
+b1, b2, b3 = st.columns([1, 2, 1])
+with b2:
+    clicked = st.button(btn_text, key="surprise_button")
 
-# Glow + centering enforcement (short polling helps Streamlit rerenders)
+# Add glow class to the button (works for both RU/EN)
 components.html(
     """
     <script>
@@ -267,26 +272,12 @@ components.html(
       const timer = setInterval(() => {
         if (Date.now() - start > maxMs) { clearInterval(timer); return; }
 
+        const texts = ["Surprise", "Сюрприз"];
         const btn = Array.from(doc.querySelectorAll("button"))
-          .find(b => ((b.innerText || "").trim()).includes("Surprise"));
+          .find(b => texts.some(t => ((b.innerText || "").trim()).includes(t)));
         if (!btn) return;
 
         btn.classList.add("ny-surprise-btn");
-        btn.style.display = "block";
-        btn.style.marginLeft = "auto";
-        btn.style.marginRight = "auto";
-
-        const wrap =
-          btn.closest('div[data-testid="stButton"]') ||
-          btn.closest('.stButton') ||
-          btn.closest('div.stButton');
-
-        if (wrap) {
-          wrap.style.width = "100%";
-          wrap.style.display = "flex";
-          wrap.style.justifyContent = "center";
-        }
-
         clearInterval(timer);
       }, 60);
     })();
@@ -295,13 +286,13 @@ components.html(
     height=1,
 )
 
-# Click: audio + confetti upwards
+# =========================================================
+# 5) Click: audio + confetti
+# =========================================================
 if clicked:
     sounds = list(Path("assets").glob("*.mp3"))
     if sounds:
         st.audio(str(random.choice(sounds)), autoplay=True)
-
-    st.session_state.confetti_nonce += 1
 
     components.html(
         """
@@ -320,12 +311,12 @@ if clicked:
           if (old) old.remove();
 
           let x = win.innerWidth * 0.5;
-          let y = win.innerHeight * 0.65;
+          let y = win.innerHeight * 0.55;
           const marker = doc.getElementById("surprise-marker");
           if (marker) {
             const r = marker.getBoundingClientRect();
             x = r.left + r.width / 2;
-            y = Math.max(20, r.top - 6);
+            y = Math.max(20, r.top + 10);
           }
 
           const layer = doc.createElement("div");
