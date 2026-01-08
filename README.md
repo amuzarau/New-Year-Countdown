@@ -1,96 +1,96 @@
 # 🎄 New Year Countdown (Streamlit)
 
-A responsive Streamlit web app that counts down the time left until New Year, supports **RU/EN** language toggle, **Day/Night** theme, falling snow, a glowing **Surprise** button with random holiday sounds, and lightweight confetti effects.
+A responsive **Streamlit countdown dashboard** that shows exactly how much time is left until **New Year (Jan 1)** — with **RU/EN** language switch, **Day/Night** theme, falling snow, festive images, and a glowing **Surprise** button that plays a random holiday sound and launches lightweight confetti.
 
 **Live demo:** https://new-year-countdown.streamlit.app/
 
 ---
 
-## ✨ Features
+## 🚀 Features
 
-- ✅ Countdown to New Year (days + hours + minutes + seconds)
-- ✅ **RU / EN** language switch
-- ✅ Correct Russian plural forms (день/дня/дней, час/часа/часов, …)
-- ✅ **Day / Night** mode
-- ✅ Responsive layout for desktop & mobile
-- ✅ Festive visuals (Santa + ornaments)
-- ✅ **Surprise** button:
-  - plays a random sound (`assets/*.mp3`)
-  - triggers lightweight confetti animation (no layout jumps)
+- ⏳ Live countdown: **days + hours + minutes + seconds**
+- 🌍 Language toggle: **RU / EN**
+- 🇷🇺 Correct Russian pluralization (день/дня/дней, час/часа/часов, …)
+- 🌗 **Day / Night** mode
+- 📱 Fully responsive UI (desktop + mobile)
+- 🎄 Festive assets (Santa + ornaments)
+- 🎁 **Surprise** button:
+  - plays a random `assets/*.mp3`
+  - launches lightweight confetti (stable, no layout jumps)
 
 ---
 
-## 🧠 How it works (Mermaid)
+## 🧱 Project Structure
 
-```mermaid
-flowchart TD
-    A[User opens app] --> B[Load UI settings<br/>Language + Theme]
-    B --> C[Compute time to Jan 1 (New Year)]
-    C --> D[Render layout<br/>Images + Countdown + Button]
-    D --> E{User clicks "Surprise"?}
-    E -- No --> D
-    E -- Yes --> F[Pick random MP3 from assets/]
-    F --> G[Play audio in Streamlit]
-    G --> H[Inject lightweight confetti overlay (JS/CSS)]
-    H --> D
-
-🗂 Project structure
-Happy-New-Year-Countdown/
+```text
+New-Year-Countdown/
+│
 ├── app.py
 ├── requirements.txt
-└── assets/
-    ├── santa_presents_3.png
-    ├── christmas_ornament_1.png
-    └── *.mp3
+├── assets/
+│   ├── santa_presents_3.png
+│   ├── christmas_ornament_1.png
+│   └── *.mp3
+└── README.md
 
-
-⚠️ Streamlit Cloud runs on Linux, so paths are case-sensitive.
+⚠️ Streamlit Cloud runs on Linux: paths are case-sensitive.
 Use assets/ exactly (not ASSETS/).
 
-🚀 Run locally
-Create & activate venv (recommended)
+⚙️ How to Run Locally
+1️⃣ Clone repository
+git clone https://github.com/<your-username>/<your-repo>.git
+cd <your-repo>
 
-Windows (PowerShell)
-
+2️⃣ Create virtual environment
 python -m venv .venv
-.venv\Scripts\Activate.ps1
+source .venv/bin/activate   # Linux / macOS
+.venv\Scripts\Activate.ps1  # Windows PowerShell
 
-
-macOS / Linux
-
-python -m venv .venv
-source .venv/bin/activate
-
-Install dependencies
+3️⃣ Install dependencies
 pip install -r requirements.txt
 
-Run the app
+4️⃣ Run Streamlit app
 streamlit run app.py
 
-☁️ Deploy to Streamlit Community Cloud
+📊 App Logic Flow (Mermaid)
+flowchart TD
+    A[App start] --> B[UI controls<br/>RU/EN + Day/Night]
+    B --> C[Compute time to Jan 1]
+    C --> D[Render layout<br/>Images + Countdown]
+    D --> E{Surprise clicked?}
+    E -- No --> D
+    E -- Yes --> F[Pick random MP3 from assets/]
+    F --> G[Play audio]
+    G --> H[Show confetti overlay]
+    H --> D
+
+☁️ Deployment (Streamlit Community Cloud)
 
 Push the project to GitHub
 
-Go to Streamlit Cloud → New app
+Go to https://streamlit.io/cloud
 
-Select your repository + branch
+Click New app
+
+Select repository + branch
 
 Set Main file path: app.py
 
 Deploy ✅
+Streamlit Cloud auto-redeploys on every push.
 
-⚙️ Requirements
+📦 Requirements
 
 requirements.txt
 
 streamlit>=1.30
 
-🧰 Tech stack
+🛠 Tech Stack
 
 Python
 
 Streamlit
 
-Lightweight JS/CSS injection for confetti/glow behavior
+Lightweight JS/CSS injection (confetti + glow)
 
 Standard library: datetime, random, pathlib
