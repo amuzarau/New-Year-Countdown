@@ -35,7 +35,7 @@ flowchart TD
     H --> D
 
 🗂 Project structure
-.
+Happy-New-Year-Countdown/
 ├── app.py
 ├── requirements.txt
 └── assets/
@@ -44,11 +44,11 @@ flowchart TD
     └── *.mp3
 
 
-⚠️ Important: Streamlit Cloud runs on Linux, so paths are case-sensitive.
+⚠️ Streamlit Cloud runs on Linux, so paths are case-sensitive.
 Use assets/ exactly (not ASSETS/).
 
 🚀 Run locally
-1) Create and activate a virtual environment (recommended)
+Create & activate venv (recommended)
 
 Windows (PowerShell)
 
@@ -61,10 +61,10 @@ macOS / Linux
 python -m venv .venv
 source .venv/bin/activate
 
-2) Install dependencies
+Install dependencies
 pip install -r requirements.txt
 
-3) Start the app
+Run the app
 streamlit run app.py
 
 ☁️ Deploy to Streamlit Community Cloud
@@ -79,28 +79,11 @@ Set Main file path: app.py
 
 Deploy ✅
 
-⚙️ Configuration
-Assets
+⚙️ Requirements
 
-Place your images and sounds in the assets/ folder:
+requirements.txt
 
-Images used by the UI:
-
-assets/santa_presents_3.png
-
-assets/christmas_ornament_1.png
-
-Sounds:
-
-any *.mp3 file in assets/ will be used by the Surprise button
-
-Customization ideas
-
-Replace images in assets/ to rebrand the app
-
-Add more sounds (assets/*.mp3) to expand the Surprise variety
-
-Adjust spacing / font sizes in the embedded CSS for your design
+streamlit>=1.30
 
 🧰 Tech stack
 
@@ -110,12 +93,4 @@ Streamlit
 
 Lightweight JS/CSS injection for confetti/glow behavior
 
-Standard library only: datetime, random, pathlib
-
-📄 License
-
-This project is released under the MIT License (you can add a LICENSE file if you want).
-
-🙌 Credits
-
-Built with Streamlit and festive assets/sounds provided by the project author.
+Standard library: datetime, random, pathlib
