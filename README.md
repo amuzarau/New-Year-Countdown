@@ -34,12 +34,19 @@ glowing continuously
 
 New-Year-Countdown/
 │
+
 ├── app.py
+
 ├── requirements.txt
+
 ├── assets/
+
 │   ├── santa_presents_3.png
+
 │   ├── christmas_ornament_1.png
+
 │   └── *.mp3
+
 └── README.md
 
 
