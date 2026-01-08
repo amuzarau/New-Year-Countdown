@@ -31,6 +31,7 @@ launches lightweight JS confetti (stable, no layout jumps)
 glowing continuously
 
 🧱 Project Structure
+
 New-Year-Countdown/
 │
 ├── app.py
@@ -40,6 +41,7 @@ New-Year-Countdown/
 │   ├── christmas_ornament_1.png
 │   └── *.mp3
 └── README.md
+
 
 ⚠️ Important (Streamlit Cloud)
 
